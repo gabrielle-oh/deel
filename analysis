@@ -1,0 +1,41 @@
+/* Count of statuses */
+SELECT state, COUNT(state)
+FROM acceptance
+GROUP BY state; -- Declined: 1653, accepted: 3777
+
+/* Identifying correlations between declines and other data points */
+SELECT corr(state,cvv_provided) AS state_cvv_corr, -- corr between state and cvv_provided: 0.0286
+corr(state,amount) AS state_amount_corr, -- corr between state and amounts: 0.0279
+corr(state,chargeback) AS state_chargeback_corr -- corr between state and chargebacks: 0.086
+FROM a_converted AS a
+JOIN c_converted AS c
+USING (external_ref);
+
+/* Checking for correlation between declines and country */
+SELECT country,
+        SUM(state) AS declines
+FROM a_converted
+GROUP BY country; -- no significant distribution
+
+/* Checking for correlation between declines and currency */
+SELECT currency,
+        SUM(state) AS declines,
+        COUNT(currency) AS total_tran
+FROM a_converted
+GROUP BY currency; -- USD has slightly higher ratio of declines but not statistically significant
+
+/* Checking for correlation between dates and declines */
+SELECT DATE_TRUNC('day', date_time) AS date,
+        SUM(state) AS declines,
+        COUNT(external_ref) AS total_tran
+FROM a_converted
+GROUP BY date
+ORDER BY declines DESC;
+
+/* Checking for correlation between week and declines */
+SELECT DATE_TRUNC('week', date_time) AS week,
+        SUM(state) AS declines,
+        COUNT(external_ref) AS total_tran
+FROM a_converted
+GROUP BY week
+ORDER BY declines DESC;
