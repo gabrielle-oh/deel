@@ -6,8 +6,6 @@ GROUP BY state; -- Declined: 1653, accepted: 3777
 /* Checking for correlation between cvv_provided and declines */
 SELECT state, count(cvv_provided)
 FROM acceptance as a
-LEFT JOIN chargeback as c
-USING (external_ref)
 WHERE cvv_provided = "TRUE"
 GROUP BY state;
 
