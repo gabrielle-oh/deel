@@ -3,24 +3,49 @@ SELECT state, COUNT(state)
 FROM acceptance
 GROUP BY state; -- Declined: 1653, accepted: 3777
 
+/* Checking for correlation between cvv_provided and declines */
+SELECT state, count(cvv_provided)
+FROM acceptance as a
+LEFT JOIN chargeback as c
+USING (external_ref)
+WHERE cvv_provided = "TRUE"
+GROUP BY state;
+
+/* Checking for correlation between chargebacks and declines */
+SELECT state, count(chargeback)
+FROM acceptance as a
+LEFT JOIN chargeback as c
+USING (external_ref)
+WHERE chargeback = "TRUE"
+GROUP BY state;
+
+/* Convert state column to simplify queries */
+UPDATE acceptance
+	SET state = 0
+	WHERE state = "ACCEPTED";
+
+UPDATE acceptance
+	SET state = 1
+	WHERE state = "DECLINED";
+
 /* Checking for correlation between declines and country */
 SELECT country,
         SUM(state) AS declines
-FROM a_converted -- version of Acceptance report with Declines as 1's and Acceptances as 0's
+FROM acceptance
 GROUP BY country; -- no significant distribution
 
 /* Checking for correlation between declines and currency */
 SELECT currency,
         SUM(state) AS declines,
         COUNT(currency) AS total_tran
-FROM a_converted
+FROM acceptance
 GROUP BY currency; -- USD has slightly higher ratio of declines but not statistically significant
 
 /* Checking for correlation between dates and declines */
 SELECT DATE_TRUNC('day', date_time) AS date,
         SUM(state) AS declines,
         COUNT(external_ref) AS total_tran
-FROM a_converted
+FROM acceptance
 GROUP BY date
 ORDER BY declines DESC;
 
@@ -28,6 +53,6 @@ ORDER BY declines DESC;
 SELECT DATE_TRUNC('week', date_time) AS week,
         SUM(state) AS declines,
         COUNT(external_ref) AS total_tran
-FROM a_converted
+FROM acceptance
 GROUP BY week
 ORDER BY declines DESC;
