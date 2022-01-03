@@ -28,14 +28,15 @@ UPDATE acceptance
 
 /* Checking for correlation between declines and country */
 SELECT country,
-        SUM(state) AS declines
+        SUM(state) AS declines,
+        COUNT(external_ref) AS total_tran
 FROM acceptance
 GROUP BY country; -- no significant distribution
 
 /* Checking for correlation between declines and currency */
 SELECT currency,
         SUM(state) AS declines,
-        COUNT(currency) AS total_tran
+        COUNT(external_ref) AS total_tran
 FROM acceptance
 GROUP BY currency; -- USD has slightly higher ratio of declines but not statistically significant
 
