@@ -6,7 +6,7 @@ GROUP BY state; -- Declined: 1653, accepted: 3777
 /* Checking for correlation between declines and country */
 SELECT country,
         SUM(state) AS declines
-FROM a_converted
+FROM a_converted -- version of Acceptance report with Declines as 1's and Acceptances as 0's
 GROUP BY country; -- no significant distribution
 
 /* Checking for correlation between declines and currency */
