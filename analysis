@@ -3,6 +3,18 @@ SELECT state, COUNT(state)
 FROM acceptance
 GROUP BY state; -- Declined: 1653, accepted: 3777
 
+/* Analysis of aggregates based on status */
+SELECT state, MIN(amount), MAX(amount), AVG(amount)
+FROM acceptance
+GROUP BY state;
+
+/* Looking at declines over time in recent period */
+SELECT DATE_TRUNC('month', date_time) AS month, COUNT(state)
+FROM acceptance
+WHERE state = "DECLINED"
+GROUP BY month
+ORDER BY month;
+
 /* Checking for correlation between cvv_provided and declines */
 SELECT state, count(cvv_provided)
 FROM acceptance as a
@@ -39,14 +51,6 @@ SELECT currency,
         COUNT(external_ref) AS total_tran
 FROM acceptance
 GROUP BY currency; -- USD has slightly higher ratio of declines but not statistically significant
-
-/* Checking for correlation between dates and declines */
-SELECT DATE_TRUNC('day', date_time) AS date,
-        SUM(state) AS declines,
-        COUNT(external_ref) AS total_tran
-FROM acceptance
-GROUP BY date
-ORDER BY declines DESC;
 
 /* Checking for correlation between week and declines */
 SELECT DATE_TRUNC('week', date_time) AS week,
