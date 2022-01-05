@@ -15,21 +15,7 @@ WHERE state = "DECLINED"
 GROUP BY month
 ORDER BY month;
 
-/* Checking for correlation between cvv_provided and declines */
-SELECT state, count(cvv_provided)
-FROM acceptance as a
-WHERE cvv_provided = "TRUE"
-GROUP BY state;
-
-/* Checking for correlation between chargebacks and declines */
-SELECT state, count(chargeback)
-FROM acceptance as a
-LEFT JOIN chargeback as c
-USING (external_ref)
-WHERE chargeback = "TRUE"
-GROUP BY state;
-
-/* Convert state column to simplify queries */
+/* Convert columns to simplify correlation queries */
 UPDATE acceptance
 	SET state = 0
 	WHERE state = "ACCEPTED";
@@ -37,6 +23,31 @@ UPDATE acceptance
 UPDATE acceptance
 	SET state = 1
 	WHERE state = "DECLINED";
+    
+UPDATE chargeback
+	SET chargeback = 0
+	WHERE chargeback = "FALSE";
+
+UPDATE chargeback
+	SET chargeback = 1
+	WHERE chargeback = "TRUE";
+    
+UPDATE acceptance
+	SET cvv_provided = 0
+	WHERE cvv_provided = "FALSE";
+
+UPDATE acceptance
+	SET cvv_provided = 1
+	WHERE cvv_provided = "TRUE";
+
+/* Checking for correlation of chargebacks, cvv_provided, amount against declines */
+
+SELECT corr(a.state,c.chargeback) AS state_chargeback_corr,
+corr(a.state, a.cvv_provided) AS state_cvv_corr,
+corr(a.state,a.amount) AS state_amount_corr
+FROM acceptance AS a
+LEFT JOIN chargeback AS c
+USING (external_ref);
 
 /* Checking for correlation between declines and country */
 SELECT country,
