@@ -1,15 +1,20 @@
 /* Count of statuses */
-SELECT state, COUNT(state)
+SELECT state, 
+	COUNT(state)
 FROM acceptance
 GROUP BY state; -- Declined: 1653, accepted: 3777
 
 /* Analysis of aggregates based on status */
-SELECT state, MIN(amount), MAX(amount), AVG(amount)
+SELECT state, 
+	MIN(amount), 
+	MAX(amount), 
+	AVG(amount)
 FROM acceptance
 GROUP BY state;
 
 /* Looking at declines over time in recent period */
-SELECT DATE_TRUNC('month', date_time) AS month, COUNT(state)
+SELECT DATE_TRUNC('month', date_time) AS month, 
+	COUNT(state)
 FROM acceptance
 WHERE state = "DECLINED"
 GROUP BY month
@@ -41,10 +46,9 @@ UPDATE acceptance
 	WHERE cvv_provided = "TRUE";
 
 /* Checking for correlation of chargebacks, cvv_provided, amount against declines */
-
 SELECT corr(a.state,c.chargeback) AS state_chargeback_corr,
-corr(a.state, a.cvv_provided) AS state_cvv_corr,
-corr(a.state,a.amount) AS state_amount_corr
+	corr(a.state, a.cvv_provided) AS state_cvv_corr,
+	corr(a.state,a.amount) AS state_amount_corr
 FROM acceptance AS a
 LEFT JOIN chargeback AS c
 USING (external_ref);
